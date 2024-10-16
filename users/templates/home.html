@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load socialaccount %}
+{% load static %}
+<style>
+    .centered-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .btn-custom {
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+    }
+    .btn-custom img {
+        margin-right: 10px;
+    }
+</style>
+<div class="centered-button">
+    <button type="button" class="btn btn-outline-dark btn-lg btn-custom">
+        <img src="{% static 'users/g.svg' %}" alt="" style="height: 40px; width: 40px;">
+        <a href="{% provider_login_url 'google' %}?next=/" style="text-decoration: none; color: inherit;">Login with Google</a>
+    </button>
+</div>
+{% endblock %}
