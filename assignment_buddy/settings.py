@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "django_gravatar",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -142,6 +143,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # This is only required when running `collectstatic` in production.
 #STATIC_ROOT = BASE_DIR / 'staticfiles'
