@@ -26,9 +26,10 @@ def gravatar(user, size=80):
 @register.filter(name='gravatar')
 def gravatar(email, size=35):
     if email:
-        email = str(email.strip().lower()).encode('utf-8')
+        email = email.strip().lower().encode('utf-8')
         email_hash = md5(email).hexdigest()
-        url = "//www.gravatar.com/avatar/{0}?s={1}&d=identicon&r=PG"
+        url = "https://www.gravatar.com/avatar/{0}?s={1}&d=identicon&r=PG"
         return url.format(email_hash, size)
     else:
-        return "//www.gravatar.com/avatar/?s={0}&d=identicon&r=PG".format(size)
+        # Default Gravatar URL when email is not provided
+        return "https://www.gravatar.com/avatar/?s={0}&d=identicon&r=PG".format(size)

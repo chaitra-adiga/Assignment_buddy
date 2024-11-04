@@ -27,24 +27,39 @@
             <button class="btn btn-outline-success" type="submit">Search</button>
           </form>
         </div>
-        <a class="navbar-brand" href="{% url 'home' %}">Home</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent" >
+          <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                  <button type="button" class="btn btn-lg btn-custom btn-outline-secondary">
+                    <a href="{% url 'home' %}"><img src="{% static 'users/1.svg' %}" alt="Home" style="height: 28px; width: 28px; margin-right: 0px;" name="home"> </a>
+                  </button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-lg btn-custom btn-outline-secondary">
+                  <a href="#"><img src="{% static 'users/2.svg' %}" alt="task" style="height: 28px; width: 28px; margin-right: 0px;" name="task"> </a>
+                </button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="btn btn-lg btn-custom btn-outline-secondary">
+                <a href="#"><img src="{% static 'users/4.svg' %}" alt="task" style="height: 30px; width: 30px; margin-right: 0px;" name="notification"> </a>
+              </button>
+          </li>
+        </ul>
+      </div>
         <ul class="navbar-nav">
           {% if user.is_authenticated and user.email %}
           <li class="nav-item dropdown">
              <a class="nav-link dropdown-toggle" href="#" id="rightnavDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img style="width: 40px;" src="{{ google_email|gravatar:60 }}" /><b class="caret"></b>
+              <img style="width: 40px;" src="{{ email|gravatar:50 }}" /><b class="caret"></b>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="rightnavDropdown">
-                <li><a class="dropdown-item" href="{% url 'logout_user' %}">Logout</a></li>
+                <li><a class="dropdown-item" href="{% url 'logoutt' %}">Logout</a></li>
             </ul>
            </li>
           </ul>
           
            {% else %}
-           <li class="nav-item"><a class="nav-link" href="{% url 'login_user' %}">Login</a></li>
+           <li class="nav-item"><a class="nav-link" href="{% url 'loginn' %}">Login</a></li>
            
         {% endif %}
       </div>
