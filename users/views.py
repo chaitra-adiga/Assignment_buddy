@@ -4,24 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Profile
-from .forms import ProfileCompletionForm # users/views.py
-# Create your views here.
-from django.shortcuts import render
+from django.urls import reverse
+from .forms import CompleteProfileForm
 from allauth.socialaccount.models import SocialAccount
-
-@login_required
-def complete_registration(request):
-    if request.method == "POST":
-        form = ProfileCompletionForm(request.POST)
-        if form.is_valid():
-            profile = form.save(commit=False)
-            profile.user = request.user
-            profile.save()
-            return redirect("home")  # Redirect to home or another page after completion
-    else:
-        form = ProfileCompletionForm()
-    return render(request, "complete_registration.html", {"form": form})
-
 
 """def register_user(request):
     if request.method == 'POST':
@@ -91,7 +76,7 @@ def register_user(request):
         phn = request.POST.get('phn')
         upi = request.POST.get('upi')
         loc = request.POST.get('loc')
-
+        
         if User.objects.filter(username=fnm).exists():
             invalid = "User Already Exists"
             return render(request, 'register.html', {'invalid': invalid})
@@ -102,20 +87,20 @@ def register_user(request):
 
         my_user = User.objects.create_user(fnm, emailid, pwd)
         my_user.save()
+        has_registered=True #registered
         user_model = User.objects.get(username=fnm)
         new_profile = Profile.objects.create(user=user_model, id_user=user_model.id, phone=phn, upi_id=upi, location=loc)
         new_profile.save()
-        login(request, my_user)
+        login(request, my_user,has_registered)
         return redirect('/')
     else:
         return render(request, 'register.html')
     
-def loginn(request):
+'''def loginn(request):
     if request.method == 'POST':
         fnm = request.POST.get('fnm')
         pwd = request.POST.get('pwd')
         userr = authenticate(request, username=fnm, password=pwd)
-        
         if userr is not None:
             login(request, userr)
             return redirect('/')
@@ -125,7 +110,12 @@ def loginn(request):
 
     google_email = None
     user = request.user
+
     if user.is_authenticated:
+         # Check if the user has registered
+        if not user.profile.has_registered:
+            # Redirect to the complete profile page
+            return redirect(reverse('complete_profile'))
         try:
             google_account = SocialAccount.objects.get(user=user, provider='google')
             google_email = google_account.extra_data.get('email')
@@ -133,7 +123,75 @@ def loginn(request):
             google_email = user.email
 
     return render(request, 'loginn.html', {'google_email': google_email})
-    
+  '''
+
+def loginn(request):
+    if request.method == 'POST':
+        # Local login logic remains the same
+        fnm = request.POST.get('fnm')
+        pwd = request.POST.get('pwd')
+        userr = authenticate(request, username=fnm, password=pwd)
+        if userr is not None:
+            login(request, userr)
+            # Check if profile is complete for local login
+            if not hasattr(userr, 'profile') or not userr.profile.has_registered:
+                return redirect('complete_profile')
+            return redirect('/')
+        
+        invalid = "Invalid Credentials"
+        return render(request, 'loginn.html', {'invalid': invalid})
+
+    google_email = None
+    user = request.user
+
+    if user.is_authenticated:
+        try:
+            google_account = SocialAccount.objects.get(user=user, provider='google')
+            google_email = google_account.extra_data.get('email')
+            # Check if profile exists and is complete for Google login
+            if not hasattr(user, 'profile') or not user.profile.has_registered:
+                return redirect('complete_profile')
+        except SocialAccount.DoesNotExist:
+            google_email = user.email
+
+    return render(request, 'loginn.html', {'google_email': google_email})
+
+  
+@login_required
+def complete_profile(request):
+    if request.method == 'POST':
+        form = CompleteProfileForm(request.POST)
+        if form.is_valid():
+            user = request.user
+            
+            # Create or update the profile
+            profile, created = Profile.objects.get_or_create(
+                user=user,
+                defaults={
+                    'id_user': user.id,
+                }
+            )
+            
+            profile.phone = form.cleaned_data['phone']
+            profile.upi_id = form.cleaned_data['upi_id']
+            profile.location = form.cleaned_data['location']
+            profile.has_registered = True
+            profile.save()
+            
+            return redirect('/')
+    else:
+        # Pre-fill form if profile exists
+        initial_data = {}
+        if hasattr(request.user, 'profile'):
+            profile = request.user.profile
+            initial_data = {
+                'phone': profile.phone,
+                'upi_id': profile.upi_id,
+                'location': profile.location,
+            }
+        form = CompleteProfileForm(initial=initial_data)
+
+    return render(request, 'complete_profile.html', {'form': form})
 
 def logoutt(request):
 	logout(request)
@@ -143,21 +201,18 @@ def logoutt(request):
 
 @login_required(login_url='/login')
 def home(request):
-    # Default value for the email
+    # Check if profile is complete
+    if not hasattr(request.user, 'profile') or not request.user.profile.has_registered:
+        return redirect('complete_profile')
+        
     email = None
-    
-    # Get the current user
     user = request.user
     
-    # Check if the user is authenticated through Google
     if user.is_authenticated:
         try:
-            # Check for a Google social account and retrieve the Google email
             google_account = SocialAccount.objects.get(user=user, provider='google')
             email = google_account.extra_data.get('email')
         except SocialAccount.DoesNotExist:
-            # If Google account doesn't exist, use the primary email (local login email)
             email = user.email
 
-    # Pass email to the template
     return render(request, 'home.html', {'email': email})
