@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+# settings.py
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,7 +56,22 @@ INSTALLED_APPS = [
     "django_gravatar",
     'users.apps.UsersConfig',  # Use the custom app configuration
 ]
-
+'''# Add to your settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'users.middleware': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}'''
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": [
@@ -70,6 +95,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware", #added by copilot
+    'users.middleware.ProfileCompletionMiddleware',  # Add this line
+    
 ]
 
 ROOT_URLCONF = 'assignment_buddy.urls'

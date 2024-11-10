@@ -21,8 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('users.urls')),
-    path("users/", include("users.urls")),  # Ensure users URLs are included
+    path('', include('users.urls')),  # No namespace needed
     path("accounts/",include("allauth.urls")),
 ]
 
